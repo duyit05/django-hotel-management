@@ -1,14 +1,8 @@
 from django.contrib.auth.models import Group
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from api.models import Room, User
-
-
-class RoomSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Room
-        fields = '__all__'
+from api.enums.user_role import UserRole
+from api.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -16,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'name', 'email', 'password','first_name','last_name']
+        fields = ['id', 'username', 'name', 'email', 'password', 'first_name', 'last_name']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -24,16 +18,15 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data["username"],
-            email=validated_data.get("email", ""),
-            name=validated_data.get("name", ""),
+            email=validated_data["email"],
+            name=validated_data["name"],
             password=validated_data["password"],
-            first_name=validated_data.get("first_name",""),
-            last_name=validated_data.get("last_name","")
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"]
         )
-        groups, _ = Group.objects.get_or_create(name='USER')
+        groups, _= Group.objects.get_or_create(name = UserRole.USER)
         user.groups.add(groups)
         return user
-
 
 # class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 #     @classmethod
